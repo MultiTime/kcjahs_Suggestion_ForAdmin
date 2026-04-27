@@ -272,11 +272,11 @@
         // 무한 루프 방지를 위한 엄격한 인증 체크
         auth.onAuthStateChanged((user) => {
             if (!user) {
-                window.location.replace("login.html");
+                window.location.replace("index.html");
             } else if (user.email !== ADMIN_EMAIL) {
                 auth.signOut().then(() => {
                     alert("관리자 권한이 없습니다.");
-                    window.location.replace("login.html");
+                    window.location.replace("index.html");
                 });
             } else {
                 startSessionTimer();
@@ -291,7 +291,7 @@
             sessionTimeout = setTimeout(() => {
                 auth.signOut().then(() => {
                     alert("세션이 만료되어 자동으로 로그아웃 되었습니다.");
-                    window.location.replace("login.html");
+                    window.location.replace("index.html");
                 });
             }, TIMEOUT_VAL);
         }
@@ -303,7 +303,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("로그아웃 하시겠습니까?")) {
-                auth.signOut().then(() => window.location.replace("login.html"));
+                auth.signOut().then(() => window.location.replace("index.html"));
             }
         });
 
