@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김천중앙고 중앙청원 관리자 시스템</title>
+    <style>
+        /* [디자인 가이드라인] 무채색, 모던, 심플, 둥근 모서리 */
+        :root {
+            --bg-main: #ffffff;
+            --bg-sidebar: #f9f9f9;
+            --text-main: #1a1a1a;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --btn-danger: #d93025;
+            --btn-success: #1e8e3e;
+            --btn-complete: #1a1a1a;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        /* 좌측 사이드바 */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .sidebar-header {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--text-main);
+        }
+
+        .menu-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--text-main);
+            color: var(--bg-main);
+        }
+
+        /* 우측 메인 콘텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 48px;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; }
+        .section-desc { color: var(--text-light); margin-bottom: 32px; font-size: 0.95rem; }
+
+        /* 검색창 및 입력창 디자인 */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 350px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input.full-width {
+            max-width: 100%;
+        }
+
+        .search-input:focus {
+            border-color: var(--text-main);
+        }
+
+        /* 테이블 공통 디자인 */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background-color: var(--bg-sidebar);
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .data-table th:first-child { border-top-left-radius: var(--border-radius); }
+        .data-table th:last-child { border-top-right-radius: var(--border-radius); }
+
+        /* 상태 구분 스타일 */
+        .status-completed, .status-rejected { background-color: #fafafa; color: #b0b0b0; }
+        .status-completed td, .status-rejected td { color: #999 !important; }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .badge-active { background-color: #e6f4ea; color: #137333; }
+        .badge-pending { background-color: #fff0f0; color: #d93025; }
+        .badge-completed { background-color: #f1f3f4; color: #5f6368; }
+        .badge-suspended { background-color: #fce8e6; color: #c5221f; }
+        .badge-rejected { background-color: #eeeeee; color: #666666; }
+
+        .post-title {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+        }
+
+        /* 버튼 공통 */
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            margin-right: 4px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-approve { background-color: var(--text-main); }
+        .btn-reject { background-color: #f1f3f4; color: var(--text-main); }
+        .btn-complete { background-color: #1a73e8; }
+        .btn-danger { background-color: #feeef0; color: #d93025; }
+        .btn-reset { background-color: #fff4e5; color: #b76e00; }
+        .btn-logout { background-color: var(--text-main); margin-top: auto; padding: 12px; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">중앙청원 관리자</div>
+        <div class="menu-item active" data-target="dashboard">회원 승인 대시보드</div>
+        <div class="menu-item" data-target="posts">건의사항 관리</div>
+        <div class="menu-item" data-target="users">전체 유저 관리</div>
+        <div class="menu-item" data-target="announcements">공지사항 관리</div>
+        <button class="btn btn-logout" id="logoutBtn">로그아웃</button>
+    </nav>
+
+    <main class="main-content">
+        <section id="dashboard" class="content-section active">
+            <h2>회원 가입 승인 대기열</h2>
+            <p class="section-desc">가입 신청 후 '승인 대기' 상태인 학생들입니다. 승인 시 서비스 이용이 가능해집니다.</p>
+            <table class="data-table">
+                <thead><tr><th>학번</th><th>이름</th><th>가입 일시</th><th>관리 액션</th></tr></thead>
+                <tbody id="pendingUserList"><tr><td colspan="4" style="text-align: center; padding: 40px;">불러오는 중...</td></tr></tbody>
+            </table>
+        </section>
+
+        <section id="posts" class="content-section">
+            <h2>건의사항 모니터링 및 처리</h2>
+            <p class="section-desc">학생들의 건의사항을 확인하고 답변 완료 처리하거나 부적절한 글을 삭제합니다.</p>
+            <table class="data-table">
+                <thead><tr><th>상태</th><th>카테고리</th><th>제목</th><th>익명 여부</th><th>작성자 (관리자용)</th><th>작성 일시</th><th>관리</th></tr></thead>
+                <tbody id="postList"><tr><td colspan="7" style="text-align: center; padding: 40px;">게시글을 불러오는 중...</td></tr></tbody>
+            </table>
+        </section>
+
+        <section id="users" class="content-section">
+            <h2>전체 유저 권한 관리</h2>
+            <p class="section-desc">가입된 전체 학생 목록을 확인하고 학번/이름으로 검색하여 계정 상태를 관리합니다.</p>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="학번 또는 이름으로 검색...">
+            </div>
+
+            <table class="data-table">
+                <thead><tr><th>상태</th><th>학번</th><th>이름</th><th>가입 일시</th><th>관리 액션</th></tr></thead>
+                <tbody id="allUserList"><tr><td colspan="5" style="text-align: center; padding: 40px;">유저 정보를 불러오는 중...</td></tr></tbody>
+            </table>
+        </section>
+
+        <section id="announcements" class="content-section">
+            <h2>공지사항 관리</h2>
+            <p class="section-desc">학생용 메인 사이트 상단에 노출될 공지 배너를 등록하고 삭제합니다. (가장 최근에 등록한 1개만 배너로 노출됩니다)</p>
+
+            <div class="search-container">
+                <input type="text" id="announcementInput" class="search-input full-width" placeholder="학생들에게 보여질 공지사항 내용을 입력하세요...">
+                <button class="btn btn-approve" onclick="addAnnouncement()">공지 등록</button>
+            </div>
+
+            <table class="data-table">
+                <thead><tr><th>상태</th><th>공지 내용</th><th>작성 일시</th><th>관리 액션</th></tr></thead>
+                <tbody id="announcementList"><tr><td colspan="4" style="text-align: center; padding: 40px;">공지사항을 불러오는 중...</td></tr></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
+            authDomain: "kcjahs-suggection.firebaseapp.com",
+            projectId: "kcjahs-suggection",
+            storageBucket: "kcjahs-suggection.firebasestorage.app",
+            messagingSenderId: "680058871961",
+            appId: "1:680058871961:web:6931fb143e6d1ce2a8d808"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const ADMIN_EMAIL = "administrator_1@kimcheon.hs";
+
+        // 무한 루프 방지를 위한 엄격한 인증 체크
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.replace("login.html");
+            } else if (user.email !== ADMIN_EMAIL) {
+                auth.signOut().then(() => {
+                    alert("관리자 권한이 없습니다.");
+                    window.location.replace("login.html");
+                });
+            } else {
+                startSessionTimer();
+            }
+        });
+
+        // 세션 타임아웃
+        let sessionTimeout;
+        const TIMEOUT_VAL = 10 * 60 * 1000;
+        function resetTimer() {
+            clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+                auth.signOut().then(() => {
+                    alert("세션이 만료되어 자동으로 로그아웃 되었습니다.");
+                    window.location.replace("login.html");
+                });
+            }, TIMEOUT_VAL);
+        }
+        function startSessionTimer() {
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+            resetTimer();
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if(confirm("로그아웃 하시겠습니까?")) {
+                auth.signOut().then(() => window.location.replace("login.html"));
+            }
+        });
+
+        // ==========================================
+        // 1. 회원 승인 대시보드 로직
+        // ==========================================
+        const pendingUserListEl = document.getElementById('pendingUserList');
+        db.collection("users").where("status", "==", "pending")
+            .onSnapshot((snapshot) => {
+                pendingUserListEl.innerHTML = "";
+                if (snapshot.empty) {
+                    pendingUserListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">승인 대기 중인 학생이 없습니다.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const date = user.createdAt ? user.createdAt.toDate().toLocaleString('ko-KR') : "기록 없음";
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.studentId || "-"}</td><td>${user.name || "미기재"}</td><td>${date}</td>
+                        <td>
+                            <button class="btn btn-approve" onclick="approveUser('${doc.id}')">승인</button>
+                            <button class="btn btn-reject" onclick="rejectUser('${doc.id}')">거절</button>
+                        </td>`;
+                    pendingUserListEl.appendChild(tr);
+                });
+            });
+
+        window.approveUser = async (id) => { if(confirm("승인하시겠습니까?")) await db.collection("users").doc(id).update({ status: 'active' }); };
+        window.rejectUser = async (id) => { if(confirm("거절하시겠습니까?")) await db.collection("users").doc(id).update({ status: 'rejected' }); };
+
+        // ==========================================
+        // 2. 게시글 관리 로직
+        // ==========================================
+        const postListEl = document.getElementById('postList');
+        db.collection("suggestions").onSnapshot((snapshot) => {
+            postListEl.innerHTML = "";
+            if (snapshot.empty) {
+                postListEl.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #999;">등록된 건의사항이 없습니다.</td></tr>`;
+                return;
+            }
+            let posts = [];
+            snapshot.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
+
+            posts.sort((a, b) => {
+                const aTime = a.date ? (a.date.toMillis ? a.date.toMillis() : new Date(a.date).getTime()) : 0;
+                const bTime = b.date ? (b.date.toMillis ? b.date.toMillis() : new Date(b.date).getTime()) : 0;
+                return bTime - aTime;
+            });
+
+            posts.forEach((data) => {
+                const status = data.status || "pending";
+                const dateStr = data.date ? (data.date.toDate ? data.date.toDate().toLocaleString('ko-KR') : data.date) : "알 수 없음";
+
+                const isAnonymous = data.anonymous === true;
+                const anonBadge = isAnonymous
+                    ? '<span class="badge badge-rejected">익명</span>'
+                    : '<span class="badge badge-active">실명</span>';
+
+                const actualAuthor = data.authorId || "이름 누락";
+
+                const tr = document.createElement('tr');
+                if (status === 'completed') tr.className = 'status-completed';
+                tr.innerHTML = `
+                    <td><span class="badge ${status === 'completed' ? 'badge-completed' : 'badge-pending'}">${status === 'completed' ? '완료' : '대기'}</span></td>
+                    <td>${data.category || "일반"}</td>
+                    <td class="post-title" title="${data.title}">${data.title || "제목 없음"}</td>
+                    <td>${anonBadge}</td>
+                    <td style="font-weight: bold;">${actualAuthor}</td>
+                    <td>${dateStr}</td>
+                    <td>
+                        ${status === 'pending' ? `<button class="btn btn-complete" onclick="completePost('${data.id}')">답변 완료</button>` : ''}
+                        <button class="btn btn-danger" onclick="deletePost('${data.id}')">삭제</button>
+                    </td>`;
+                postListEl.appendChild(tr);
+            });
+        });
+
+        window.completePost = async (id) => { if(confirm("답변을 완료하셨나요?")) await db.collection("suggestions").doc(id).update({ status: 'completed' }); };
+        window.deletePost = async (id) => { if(confirm("삭제하시겠습니까?")) await db.collection("suggestions").doc(id).delete(); };
+
+        // ==========================================
+        // 3. 전체 유저 관리 로직
+        // ==========================================
+        const searchInput = document.getElementById('searchInput');
+        const allUserListEl = document.getElementById('allUserList');
+        let allUsersData = [];
+
+        db.collection("users").onSnapshot((snapshot) => {
+            allUsersData = [];
+            snapshot.forEach(doc => allUsersData.push({ id: doc.id, ...doc.data() }));
+            renderAllUsers();
+        });
+
+        searchInput.addEventListener('input', renderAllUsers);
+
+        function renderAllUsers() {
+            allUserListEl.innerHTML = "";
+            const keyword = searchInput.value.trim().toLowerCase();
+
+            const filteredUsers = allUsersData.filter(user => {
+                const sid = (user.studentId || "").toLowerCase();
+                const sname = (user.name || "").toLowerCase();
+                return sid.includes(keyword) || sname.includes(keyword);
+            });
+
+            if (filteredUsers.length === 0) {
+                allUserListEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #999;">검색 결과가 없습니다.</td></tr>`;
+                return;
+            }
+
+            filteredUsers.sort((a, b) => (a.studentId || "").localeCompare(b.studentId || ""));
+
+            filteredUsers.forEach((user) => {
+                const status = user.status || "알 수 없음";
+                const dateStr = user.createdAt ? user.createdAt.toDate().toLocaleString('ko-KR') : "기록 없음";
+
+                let badgeClass = "badge-rejected";
+                let statusKo = status;
+                if(status === 'active') { badgeClass = "badge-active"; statusKo = "정상 (Active)"; }
+                else if(status === 'pending') { badgeClass = "badge-pending"; statusKo = "대기 (Pending)"; }
+                else if(status === 'suspended') { badgeClass = "badge-suspended"; statusKo = "정지 (Suspended)"; }
+                else if(status === 'rejected') { badgeClass = "badge-rejected"; statusKo = "거절/탈퇴 (Rejected)"; }
+
+                const tr = document.createElement('tr');
+                if (status === 'rejected') tr.className = 'status-rejected';
+
+                tr.innerHTML = `
+                    <td><span class="badge ${badgeClass}">${statusKo}</span></td>
+                    <td>${user.studentId || "-"}</td>
+                    <td>${user.name || "미기재"}</td>
+                    <td>${dateStr}</td>
+                    <td>
+                        ${status === 'active' ? `<button class="btn btn-danger" onclick="suspendUser('${user.id}')">정지</button>` : ''}
+                        ${status === 'suspended' ? `<button class="btn btn-approve" onclick="restoreUser('${user.id}')">복구</button>` : ''}
+                        <button class="btn btn-reset" onclick="resetPassword('${user.email}', '${user.studentId}')">비번 초기화</button>
+                    </td>
+                `;
+                allUserListEl.appendChild(tr);
+            });
+        }
+
+        window.suspendUser = async (id) => {
+            if(confirm("이 유저를 정지(블랙리스트)시키겠습니까? 사이트 접속이 차단됩니다.")) {
+                await db.collection("users").doc(id).update({ status: 'suspended' });
+            }
+        };
+
+        window.restoreUser = async (id) => {
+            if(confirm("이 유저의 정지를 해제하고 복구하시겠습니까?")) {
+                await db.collection("users").doc(id).update({ status: 'active' });
+            }
+        };
+
+        window.resetPassword = (dbEmail, studentId) => {
+            const targetEmail = prompt(`비밀번호 재설정 링크를 보낼 이메일을 입력하세요.\n(학생의 실제 이메일이어야 합니다.)`, dbEmail || `${studentId}@gimcheon.hs.kr`);
+
+            if(targetEmail) {
+                auth.sendPasswordResetEmail(targetEmail)
+                    .then(() => alert(`${targetEmail}로 비밀번호 초기화 메일을 전송했습니다.`))
+                    .catch((error) => alert(`전송 실패: 올바르지 않은 이메일 형식이거나 등록되지 않은 유저입니다.\n(${error.message})`));
+            }
+        };
+
+        // ==========================================
+        // 📢 4. 공지사항 관리 로직 (새로 추가됨)
+        // ==========================================
+        const announcementListEl = document.getElementById('announcementList');
+
+        // 실시간으로 공지사항 목록 불러오기 (최신순 정렬)
+        db.collection("announcements").orderBy("date", "desc").onSnapshot(snapshot => {
+            announcementListEl.innerHTML = "";
+
+            if (snapshot.empty) {
+                announcementListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">등록된 공지사항이 없습니다.<br>(학생 화면에서 공지 배너가 자동으로 숨겨집니다)</td></tr>`;
+                return;
+            }
+
+            snapshot.docs.forEach((doc, index) => {
+                const data = doc.data();
+                const dateStr = data.date ? (typeof data.date.toDate === 'function' ? data.date.toDate().toLocaleString('ko-KR') : data.date) : "시간 없음";
+
+                // 학생 화면에는 가장 최신 글 1개만 뜨므로, 인덱스 0번에게 '현재 노출 중' 배지 부여
+                const isLatest = index === 0;
+                const statusBadge = isLatest
+                    ? '<span class="badge badge-active">현재 노출 중</span>'
+                    : '<span class="badge badge-rejected">과거 공지</span>';
+
+                const tr = document.createElement('tr');
+                if (!isLatest) tr.className = 'status-rejected'; // 과거 공지는 흐리게 처리
+
+                tr.innerHTML = `
+                    <td>${statusBadge}</td>
+                    <td style="font-weight: ${isLatest ? 'bold' : 'normal'}; max-width: 300px; word-break: break-all;">${data.content}</td>
+                    <td>${dateStr}</td>
+                    <td><button class="btn btn-danger" onclick="deleteAnnouncement('${doc.id}')">삭제</button></td>
+                `;
+                announcementListEl.appendChild(tr);
+            });
+        });
+
+        // 새로운 공지 등록
+        window.addAnnouncement = async () => {
+            const contentInput = document.getElementById('announcementInput');
+            const content = contentInput.value.trim();
+
+            if (!content) return alert("공지사항 내용을 입력해주세요.");
+
+            try {
+                await db.collection("announcements").add({
+                    content: content,
+                    date: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                contentInput.value = ''; // 입력창 초기화
+                alert("공지사항이 성공적으로 등록되었습니다.\n(학생 화면에 즉시 노출됩니다)");
+            } catch (error) {
+                alert("등록 실패: " + error.message);
+            }
+        };
+
+        // 공지 삭제
+        window.deleteAnnouncement = async (id) => {
+            if(confirm("이 공지사항을 삭제하시겠습니까?\n(가장 최신 공지를 삭제하면 다음 순서의 공지가 노출됩니다.)")) {
+                try {
+                    await db.collection("announcements").doc(id).delete();
+                } catch (error) {
+                    alert("삭제 실패: " + error.message);
+                }
+            }
+        };
+
+        // ==========================================
+        // 5. UI 탭 전환 로직
+        // ==========================================
+        const menuItems = document.querySelectorAll('.menu-item');
+        const sections = document.querySelectorAll('.content-section');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const target = item.getAttribute('data-target');
+                sections.forEach(s => { s.classList.remove('active'); if(s.id === target) s.classList.add('active'); });
+            });
+        });
+    </script>
+</body>
+</html>
