@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="rogo2.png">
+    <title>중앙청원 관리자 로그인</title>
+    <style>
+        :root {
+            --bg-main: #ffffff;
+            --bg-secondary: #f9f9f9;
+            --text-main: #1a1a1a;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --accent-color: #1a1a1a;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            color: var(--text-main);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background-color: var(--bg-main);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .login-header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        .login-header p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 30px; }
+
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-light); }
+
+        input {
+            width: 100%; padding: 14px; border: 1px solid var(--border-color);
+            border-radius: var(--border-radius); font-size: 1rem; outline: none;
+        }
+        input:focus { border-color: var(--accent-color); }
+
+        .btn-login {
+            width: 100%; padding: 14px; background-color: var(--accent-color);
+            color: #fff; border: none; border-radius: var(--border-radius);
+            font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px;
+        }
+        .btn-login:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1>중앙청원 관리자</h1>
+            <p>Admin 서비스 접속을 위해 로그인해 주세요.</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">관리자 이메일</label>
+                <input type="email" id="email" placeholder="admin@example.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">접속하기</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
+          authDomain: "kcjahs-suggection.firebaseapp.com",
+          projectId: "kcjahs-suggection",
+          storageBucket: "kcjahs-suggection.firebasestorage.app",
+          messagingSenderId: "680058871961",
+          appId: "1:680058871961:web:6931fb143e6d1ce2a8d808",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // 👑 [단일 관리자 지정]
+        const ADMIN_EMAIL = "administrator_1@kimcheon.hs";
+
+        // 로그인 폼 제출
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // 1. 제출한 이메일이 관리자가 아니면 아예 Firebase 요청도 안 함
+            if (email !== ADMIN_EMAIL) {
+                alert("관리자 권한이 없는 이메일입니다.");
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // 루프 방지를 위해 href 대신 replace 사용 (뒤로 가기 방지)
+                    window.location.replace("kcjahsSuggestion_Admin.html");
+                })
+                .catch((error) => {
+                    alert("이메일 또는 비밀번호가 올바르지 않습니다.");
+                });
+        });
+
+        // 이미 로그인된 상태인지 체크
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                if (user.email === ADMIN_EMAIL) {
+                    window.location.replace("kcjahsSuggestion_Admin.html");
+                } else {
+                    // 권한 없는 계정이 잔류해 있다면 강제 로그아웃 (무한루프 방지의 핵심)
+                    auth.signOut();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
