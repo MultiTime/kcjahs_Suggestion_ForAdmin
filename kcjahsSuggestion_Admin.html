@@ -90,7 +90,7 @@
         h2 { margin-bottom: 8px; font-size: 1.8rem; font-weight: 700; }
         .section-desc { color: var(--text-light); margin-bottom: 32px; font-size: 0.95rem; }
 
-        /* 검색창 및 입력창 디자인 */
+        /* 검색창 디자인 */
         .search-container {
             margin-bottom: 20px;
             display: flex;
@@ -108,13 +108,8 @@
             transition: border-color 0.2s;
         }
 
-        .search-input.full-width {
-            max-width: 100%;
-        }
-
-        .search-input:focus {
-            border-color: var(--text-main);
-        }
+        .search-input.full-width { max-width: 100%; }
+        .search-input:focus { border-color: var(--text-main); }
 
         /* 테이블 공통 디자인 */
         .data-table {
@@ -131,26 +126,16 @@
             font-size: 0.9rem;
         }
 
-        .data-table th {
-            background-color: var(--bg-sidebar);
-            color: var(--text-main);
-            font-weight: 700;
-        }
-
+        .data-table th { background-color: var(--bg-sidebar); color: var(--text-main); font-weight: 700; }
         .data-table th:first-child { border-top-left-radius: var(--border-radius); }
         .data-table th:last-child { border-top-right-radius: var(--border-radius); }
 
-        /* 상태 구분 스타일 */
         .status-completed, .status-rejected { background-color: #fafafa; color: #b0b0b0; }
         .status-completed td, .status-rejected td { color: #999 !important; }
 
         .badge {
-            padding: 5px 10px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-block;
-            text-align: center;
+            padding: 5px 10px; border-radius: 30px; font-size: 0.75rem;
+            font-weight: 700; display: inline-block; text-align: center;
         }
 
         .badge-active { background-color: #e6f4ea; color: #137333; }
@@ -160,25 +145,15 @@
         .badge-rejected { background-color: #eeeeee; color: #666666; }
 
         .post-title {
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 600;
+            max-width: 200px; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; font-weight: 600;
         }
 
         /* 버튼 공통 */
         .btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-            margin-right: 4px;
-            color: white;
-            white-space: nowrap;
+            padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 700; transition: all 0.2s; font-size: 0.85rem;
+            margin-right: 4px; color: white; white-space: nowrap;
         }
 
         .btn:hover { opacity: 0.8; transform: translateY(-1px); }
@@ -188,6 +163,21 @@
         .btn-danger { background-color: #feeef0; color: #d93025; }
         .btn-reset { background-color: #fff4e5; color: #b76e00; }
         .btn-logout { background-color: var(--text-main); margin-top: auto; padding: 12px; }
+
+        /* 토글 스위치 디자인 */
+        .system-card {
+            background-color: #fff; border: 1px solid var(--border-color);
+            border-radius: var(--border-radius); padding: 24px; margin-top: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .system-card.danger-mode { border-color: #ffcccc; background-color: #fffaf9; }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--btn-danger); }
+        input:checked + .slider:before { transform: translateX(22px); }
     </style>
 </head>
 <body>
@@ -198,6 +188,8 @@
         <div class="menu-item" data-target="posts">건의사항 관리</div>
         <div class="menu-item" data-target="users">전체 유저 관리</div>
         <div class="menu-item" data-target="announcements">공지사항 관리</div>
+        <div class="menu-item" data-target="system" style="margin-top: 20px; color: #d93025; background: #fffaf9; border: 1px solid #ffcccc;">⚙️ 시스템 설정</div>
+
         <button class="btn btn-logout" id="logoutBtn">로그아웃</button>
     </nav>
 
@@ -236,7 +228,7 @@
 
         <section id="announcements" class="content-section">
             <h2>공지사항 관리</h2>
-            <p class="section-desc">학생용 메인 사이트 상단에 노출될 공지 배너를 등록하고 삭제합니다. (가장 최근에 등록한 1개만 배너로 노출됩니다)</p>
+            <p class="section-desc">학생용 메인 사이트 상단에 노출될 공지 배너를 등록하고 삭제합니다.</p>
 
             <div class="search-container">
                 <input type="text" id="announcementInput" class="search-input full-width" placeholder="학생들에게 보여질 공지사항 내용을 입력하세요...">
@@ -248,6 +240,25 @@
                 <tbody id="announcementList"><tr><td colspan="4" style="text-align: center; padding: 40px;">공지사항을 불러오는 중...</td></tr></tbody>
             </table>
         </section>
+
+        <section id="system" class="content-section">
+            <h2>시스템 설정</h2>
+            <p class="section-desc">웹사이트의 전체적인 운영 상태를 제어합니다.</p>
+
+            <div class="system-card danger-mode">
+                <div>
+                    <h3 style="color: var(--btn-danger); margin-bottom: 8px;">사이트 점검 모드 (Maintenance Mode)</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">
+                        이 스위치를 켜면 학생들이 사이트에 접속할 수 없으며 "점검 중" 안내 화면이 표시됩니다.<br>
+                        오류 수정이나 업데이트 등 비상 상황 시에만 사용해 주세요.
+                    </p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </section>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -255,6 +266,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
+        // 본인의 파이어베이스 설정값
         const firebaseConfig = {
             apiKey: "AIzaSyAoGGM7daU7iXqn1N4dKK1zpyUnOTsy6i0",
             authDomain: "kcjahs-suggection.firebaseapp.com",
@@ -269,18 +281,15 @@
 
         const ADMIN_EMAIL = "administrator_1@kimcheon.hs";
 
-        // 무한 루프 방지를 위한 엄격한 인증 체크
+        // 관리자 인증 체크
         auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.replace("index.html");
-            } else if (user.email !== ADMIN_EMAIL) {
+            if (!user) { window.location.replace("index.html"); }
+            else if (user.email !== ADMIN_EMAIL) {
                 auth.signOut().then(() => {
                     alert("관리자 권한이 없습니다.");
                     window.location.replace("index.html");
                 });
-            } else {
-                startSessionTimer();
-            }
+            } else { startSessionTimer(); }
         });
 
         // 세션 타임아웃
@@ -296,47 +305,42 @@
             }, TIMEOUT_VAL);
         }
         function startSessionTimer() {
-            document.onmousemove = resetTimer;
-            document.onkeypress = resetTimer;
-            resetTimer();
+            document.onmousemove = resetTimer; document.onkeypress = resetTimer; resetTimer();
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if(confirm("로그아웃 하시겠습니까?")) {
-                auth.signOut().then(() => window.location.replace("index.html"));
-            }
+            if(confirm("로그아웃 하시겠습니까?")) auth.signOut().then(() => window.location.replace("index.html"));
         });
 
         // ==========================================
         // 1. 회원 승인 대시보드 로직
         // ==========================================
         const pendingUserListEl = document.getElementById('pendingUserList');
-        db.collection("users").where("status", "==", "pending")
-            .onSnapshot((snapshot) => {
-                pendingUserListEl.innerHTML = "";
-                if (snapshot.empty) {
-                    pendingUserListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">승인 대기 중인 학생이 없습니다.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach((doc) => {
-                    const user = doc.data();
-                    const date = user.createdAt ? user.createdAt.toDate().toLocaleString('ko-KR') : "기록 없음";
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${user.studentId || "-"}</td><td>${user.name || "미기재"}</td><td>${date}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="approveUser('${doc.id}')">승인</button>
-                            <button class="btn btn-reject" onclick="rejectUser('${doc.id}')">거절</button>
-                        </td>`;
-                    pendingUserListEl.appendChild(tr);
-                });
+        db.collection("users").where("status", "==", "pending").onSnapshot((snapshot) => {
+            pendingUserListEl.innerHTML = "";
+            if (snapshot.empty) {
+                pendingUserListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">승인 대기 중인 학생이 없습니다.</td></tr>`;
+                return;
+            }
+            snapshot.forEach((doc) => {
+                const user = doc.data();
+                const date = user.createdAt ? user.createdAt.toDate().toLocaleString('ko-KR') : "기록 없음";
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.studentId || "-"}</td><td>${user.name || "미기재"}</td><td>${date}</td>
+                    <td>
+                        <button class="btn btn-approve" onclick="approveUser('${doc.id}')">승인</button>
+                        <button class="btn btn-reject" onclick="rejectUser('${doc.id}')">거절</button>
+                    </td>`;
+                pendingUserListEl.appendChild(tr);
             });
+        });
 
         window.approveUser = async (id) => { if(confirm("승인하시겠습니까?")) await db.collection("users").doc(id).update({ status: 'active' }); };
         window.rejectUser = async (id) => { if(confirm("거절하시겠습니까?")) await db.collection("users").doc(id).update({ status: 'rejected' }); };
 
         // ==========================================
-        // 2. 게시글 관리 로직
+        // 2. 게시글 관리 로직 (익명 여부 구분 유지)
         // ==========================================
         const postListEl = document.getElementById('postList');
         db.collection("suggestions").onSnapshot((snapshot) => {
@@ -446,55 +450,28 @@
             });
         }
 
-        window.suspendUser = async (id) => {
-            if(confirm("이 유저를 정지(블랙리스트)시키겠습니까? 사이트 접속이 차단됩니다.")) {
-                await db.collection("users").doc(id).update({ status: 'suspended' });
-            }
-        };
-
-        window.restoreUser = async (id) => {
-            if(confirm("이 유저의 정지를 해제하고 복구하시겠습니까?")) {
-                await db.collection("users").doc(id).update({ status: 'active' });
-            }
-        };
-
-        window.resetPassword = (dbEmail, studentId) => {
-            const targetEmail = prompt(`비밀번호 재설정 링크를 보낼 이메일을 입력하세요.\n(학생의 실제 이메일이어야 합니다.)`, dbEmail || `${studentId}@gimcheon.hs.kr`);
-
-            if(targetEmail) {
-                auth.sendPasswordResetEmail(targetEmail)
-                    .then(() => alert(`${targetEmail}로 비밀번호 초기화 메일을 전송했습니다.`))
-                    .catch((error) => alert(`전송 실패: 올바르지 않은 이메일 형식이거나 등록되지 않은 유저입니다.\n(${error.message})`));
-            }
-        };
+        window.suspendUser = async (id) => { if(confirm("정지시키겠습니까?")) await db.collection("users").doc(id).update({ status: 'suspended' }); };
+        window.restoreUser = async (id) => { if(confirm("복구하시겠습니까?")) await db.collection("users").doc(id).update({ status: 'active' }); };
 
         // ==========================================
-        // 📢 4. 공지사항 관리 로직 (새로 추가됨)
+        // 4. 공지사항 관리 로직
         // ==========================================
         const announcementListEl = document.getElementById('announcementList');
-
-        // 실시간으로 공지사항 목록 불러오기 (최신순 정렬)
         db.collection("announcements").orderBy("date", "desc").onSnapshot(snapshot => {
             announcementListEl.innerHTML = "";
-
             if (snapshot.empty) {
-                announcementListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">등록된 공지사항이 없습니다.<br>(학생 화면에서 공지 배너가 자동으로 숨겨집니다)</td></tr>`;
+                announcementListEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">등록된 공지사항이 없습니다.</td></tr>`;
                 return;
             }
 
             snapshot.docs.forEach((doc, index) => {
                 const data = doc.data();
                 const dateStr = data.date ? (typeof data.date.toDate === 'function' ? data.date.toDate().toLocaleString('ko-KR') : data.date) : "시간 없음";
-
-                // 학생 화면에는 가장 최신 글 1개만 뜨므로, 인덱스 0번에게 '현재 노출 중' 배지 부여
                 const isLatest = index === 0;
-                const statusBadge = isLatest
-                    ? '<span class="badge badge-active">현재 노출 중</span>'
-                    : '<span class="badge badge-rejected">과거 공지</span>';
+                const statusBadge = isLatest ? '<span class="badge badge-active">현재 노출 중</span>' : '<span class="badge badge-rejected">과거 공지</span>';
 
                 const tr = document.createElement('tr');
-                if (!isLatest) tr.className = 'status-rejected'; // 과거 공지는 흐리게 처리
-
+                if (!isLatest) tr.className = 'status-rejected';
                 tr.innerHTML = `
                     <td>${statusBadge}</td>
                     <td style="font-weight: ${isLatest ? 'bold' : 'normal'}; max-width: 300px; word-break: break-all;">${data.content}</td>
@@ -505,38 +482,59 @@
             });
         });
 
-        // 새로운 공지 등록
         window.addAnnouncement = async () => {
-            const contentInput = document.getElementById('announcementInput');
-            const content = contentInput.value.trim();
-
+            const content = document.getElementById('announcementInput').value.trim();
             if (!content) return alert("공지사항 내용을 입력해주세요.");
-
             try {
-                await db.collection("announcements").add({
-                    content: content,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                contentInput.value = ''; // 입력창 초기화
-                alert("공지사항이 성공적으로 등록되었습니다.\n(학생 화면에 즉시 노출됩니다)");
-            } catch (error) {
-                alert("등록 실패: " + error.message);
-            }
+                await db.collection("announcements").add({ content: content, date: firebase.firestore.FieldValue.serverTimestamp() });
+                document.getElementById('announcementInput').value = '';
+                alert("공지사항이 등록되었습니다.");
+            } catch (error) { alert("등록 실패: " + error.message); }
         };
 
-        // 공지 삭제
         window.deleteAnnouncement = async (id) => {
-            if(confirm("이 공지사항을 삭제하시겠습니까?\n(가장 최신 공지를 삭제하면 다음 순서의 공지가 노출됩니다.)")) {
+            if(confirm("이 공지사항을 삭제하시겠습니까?")) await db.collection("announcements").doc(id).delete();
+        };
+
+        // ==========================================
+        // 📢 5. 시스템 점검 모드(Maintenance) 설정 제어 (새로 추가됨)
+        // ==========================================
+        const maintenanceToggle = document.getElementById('maintenanceToggle');
+
+        // Firestore의 settings > system 문서를 감지해서 스위치 상태 동기화
+        db.collection("settings").doc("system").onSnapshot((doc) => {
+            if (doc.exists) {
+                maintenanceToggle.checked = doc.data().isMaintenanceMode || false;
+            } else {
+                maintenanceToggle.checked = false; // 기본값
+            }
+        });
+
+        window.toggleMaintenance = async () => {
+            const isChecked = maintenanceToggle.checked;
+            const msg = isChecked
+                ? "정말 사이트를 점검 모드로 전환하시겠습니까?\n모든 학생들의 접속이 즉시 차단됩니다."
+                : "점검 모드를 해제하시겠습니까?\n학생들의 접속이 다시 재개됩니다.";
+
+            if (confirm(msg)) {
                 try {
-                    await db.collection("announcements").doc(id).delete();
+                    // 문서가 없으면 생성(set)하고 있으면 합치기(merge)
+                    await db.collection("settings").doc("system").set({
+                        isMaintenanceMode: isChecked
+                    }, { merge: true });
+
+                    alert(isChecked ? "사이트가 점검 모드로 전환되었습니다." : "점검 모드가 해제되었습니다.");
                 } catch (error) {
-                    alert("삭제 실패: " + error.message);
+                    alert("상태 변경 실패: 데이터베이스 권한이 필요합니다.");
+                    maintenanceToggle.checked = !isChecked; // 에러 시 원래 상태로 롤백
                 }
+            } else {
+                maintenanceToggle.checked = !isChecked; // 취소 시 원래 상태로 롤백
             }
         };
 
         // ==========================================
-        // 5. UI 탭 전환 로직
+        // 6. UI 탭 전환 로직
         // ==========================================
         const menuItems = document.querySelectorAll('.menu-item');
         const sections = document.querySelectorAll('.content-section');
